@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{_layout}">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Product</title>
+</head>
+
+<body>
+    <div layout:fragment="content" class="container body-content">
+        <h2>Edit Product</h2>
+        <form th:action="@{/products/save}" th:object="${product}" method="post" class="form"
+            enctype="multipart/form-data">
+            <input type="hidden" th:field="*{id}">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input class="form-control" type="text" th:field="*{name}" id="name" placeholder="Product Name"
+                    required>
+            </div>
+            <div class="form-group">
+                <label>Current Image:</label><br>
+                <img th:if="${product.image != null and product.image.startsWith('http')}" height="100"
+                    th:src="${product.image}" alt="Product Image">
+                <img th:if="${product.image != null and !product.image.startsWith('http')}" height="100"
+                    th:src="@{'/images/' + ${product.image}}" alt="Product Image">
+                <img th:if="${product.image == null or product.image.isEmpty()}" height="100"
+                    th:src="@{'https://placehold.co/150x120?text=No+Image'}" alt="No Image">
+            </div>
+            <div class="form-group">
+                <label for="imageFile">Update Image (Optional):</label>
+                <input class="form-control" type="file" name="imageFile" id="imageFile" accept="image/*"
+                    onchange="previewImage(event)">
+                <div class="mt-2">
+                    <img id="imagePreview" src="#" alt="New Image Preview"
+                        style="display: none; max-width: 200px; max-height: 200px;">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="price">Price:</label>
+                <input class="form-control" type="number" th:field="*{price}" id="price" placeholder="Price" required
+                    min="0">
+            </div>
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <select th:field="*{category}" class="form-control" id="category">
+                    <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}">
+                    </option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Product</button>
+            <a th:href="@{/products}" class="btn btn-secondary">Back to Home</a>
+        </form>
+
+        <script>
+            function previewImage(event) {
+                if (event.target.files.length > 0) {
+                    var reader = new FileReader();
+                    reader.onload = function () {
+                        var output = document.getElementById('imagePreview');
+                        output.src = reader.result;
+                        output.style.display = 'block';
+                    };
+                    reader.readAsDataURL(event.target.files[0]);
+                }
+            }
+
+            document.querySelector('.form').addEventListener('submit', function (e) {
+                e.preventDefault(); // Prevent page reload
+                const formData = new FormData(this);
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerText;
+                submitBtn.innerText = 'Updating...';
+                submitBtn.disabled = true;
+
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.href = '/products';
+                    } else {
+                        alert('Có lỗi xảy ra khi cập nhật!');
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi cập nhật!');
+                }).finally(() => {
+                    submitBtn.innerText = originalText;
+                    submitBtn.disabled = false;
+                });
+            });
+        </script>
+    </div>
+</body>
+
+</html>

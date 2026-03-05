@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{_layout}">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <div layout:fragment="content" class="container body-content">
+        <a th:href="@{/products/add}" class="btn btn-primary">Create New Product</a>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Image</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Category Name</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="product : ${products}">
+                    <th scope="row" th:text="${product.id}"></th>
+                    <td th:text="${product.name}"></td>
+                    <td>
+                        <img th:if="${product.image != null and product.image.startsWith('http')}" height="120"
+                            width="150" th:src="${product.image}" alt="Product Image">
+                        <img th:if="${product.image != null and !product.image.startsWith('http')}" height="120"
+                            width="150" th:src="@{'/images/' + ${product.image}}" alt="Product Image">
+                        <img th:if="${product.image == null or product.image.isEmpty()}" height="120" width="150"
+                            th:src="@{'https://placehold.co/150x120?text=No+Image'}" alt="No Image">
+                    </td>
+                    <td th:text="${product.price}"></td>
+                    <td th:text="${product.category != null} ? ${product.category.name} : ''"></td>
+                    <td>
+                        <a th:href="@{/products/edit/{id}(id=${product.id})}" class="btn btn-secondary btn-sm">Edit</a>
+                        <a th:href="@{/products/delete/{id}(id=${product.id})}" class="btn btn-danger btn-sm"
+                            onclick="return confirm('Are you sure you want to delete this product?');">Delete</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>
