@@ -2,6 +2,7 @@ package com.example.bai5_qlsp.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import java.util.List;
 
 @Entity
 @Table(name = "category")
@@ -13,6 +14,9 @@ public class Category {
     @NotBlank(message = "Tên danh mục không được để trống")
     @Column(nullable = false, length = 255)
     private String name;
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    private List<Product> products;
 
     public Category() {
     }
@@ -31,5 +35,13 @@ public class Category {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<Product> products) {
+        this.products = products;
     }
 }

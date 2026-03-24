@@ -20,13 +20,16 @@ public class Product {
 
     @NotNull(message = "Giá sản phẩm không được để trống")
     @Min(value = 1, message = "Giá sản phẩm không được nhỏ hơn 1")
-    @Max(value = 9999999, message = "Giá sản phẩm không được lớn hơn 9999999")
+    @Max(value = 1000000000, message = "Giá sản phẩm không được lớn hơn 1.000.000.000")
     @Column(nullable = false)
     private Long price;
 
     @Length(min = 0, max = 200, message = "Tên hình ảnh không quá 200 kí tự")
     @Column(length = 200)
     private String image;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = true)
@@ -65,6 +68,14 @@ public class Product {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Category getCategory() {
