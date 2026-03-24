@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang chủ - Course Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <style>
+        :root { --primary: #0d6efd; --card-shadow: 0 4px 6px rgba(0,0,0,.08); }
+        body { min-height: 100vh; display: flex; flex-direction: column; font-family: 'Segoe UI', system-ui, sans-serif; }
+        main { flex: 1; }
+        .course-card { transition: transform .2s, box-shadow .2s; border-radius: 12px; overflow: hidden; }
+        .course-card:hover { transform: translateY(-6px); box-shadow: 0 12px 24px rgba(0,0,0,.12); }
+        .course-img { height: 180px; object-fit: cover; }
+        .navbar { box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+        .search-form { max-width: 400px; }
+        @media (max-width: 768px) {
+            .course-img { height: 140px; }
+            .search-form { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/home}"><i class="bi bi-book-half"></i> Course Registration</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="nav">
+                <form th:action="@{/home}" method="get" class="d-flex search-form mx-auto my-2 my-lg-0">
+                    <input name="search" type="search" class="form-control me-2" placeholder="Tìm học phần theo tên..." th:value="${search}">
+                    <button class="btn btn-light" type="submit"><i class="bi bi-search"></i></button>
+                </form>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/home}">Trang chủ</a></li>
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a class="nav-link" th:href="@{/admin/courses}">Quản lý học phần</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasRole('STUDENT')">
+                        <a class="nav-link" th:href="@{/my-courses}">Học phần của tôi</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAnonymous()">
+                        <a class="nav-link" th:href="@{/login}">Đăng nhập</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAnonymous()">
+                        <a class="nav-link" th:href="@{/register}">Đăng ký</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <span class="nav-link"><i class="bi bi-person-circle"></i> <span sec:authentication="name"></span></span>
+                    </li>
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <form th:action="@{/logout}" method="post" class="d-inline">
+                            <button class="btn btn-link nav-link" type="submit">Đăng xuất</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-4">
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show">
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <h1 class="mb-4">Danh sách học phần</h1>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            <div class="col" th:each="course : ${courses}">
+                <div class="card h-100 course-card shadow-sm">
+                    <img th:src="${course.image} ?: 'https://picsum.photos/300/200'" class="card-img-top course-img" alt="Course">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${course.name}">Tên học phần</h5>
+                        <p class="card-text mb-1"><i class="bi bi-award text-primary"></i> <span th:text="|${course.credits} tín chỉ|">0 tín chỉ</span></p>
+                        <p class="card-text mb-2"><i class="bi bi-person text-primary"></i> <span th:text="${course.lecturer}">Giảng viên</span></p>
+                        <div sec:authorize="hasRole('STUDENT')">
+                            <form th:action="@{/enroll/{id}(id=${course.id})}" method="post">
+                                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-circle"></i> Đăng ký</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <nav th:if="${totalPages > 1}" class="mt-4">
+            <ul class="pagination justify-content-center flex-wrap">
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{/home(search=${search}, page=${currentPage - 1})}" th:if="${currentPage > 0}">Trước</a>
+                    <span class="page-link" th:if="${currentPage == 0}">Trước</span>
+                </li>
+                <th:block th:if="${totalPages > 0}">
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" th:href="@{/home(search=${search}, page=${i})}" th:text="${i + 1}">1</a>
+                    </li>
+                </th:block>
+                <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+                    <a class="page-link" th:href="@{/home(search=${search}, page=${currentPage + 1})}" th:if="${currentPage < totalPages - 1}">Sau</a>
+                    <span class="page-link" th:if="${currentPage >= totalPages - 1}">Sau</span>
+                </li>
+            </ul>
+        </nav>
+    </main>
+
+    <footer class="bg-dark text-white text-center py-3 mt-auto">
+        <small>Hệ thống đăng ký học phần &copy; 2026</small>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>

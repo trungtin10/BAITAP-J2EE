@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${course.id != null} ? 'Sửa học phần' : 'Thêm học phần'">Form học phần</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/admin/courses}">Quản lý học phần</a>
+        </div>
+    </nav>
+
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100">
+        <div id="toastErr" class="toast align-items-center text-bg-danger border-0" role="alert" th:if="${error}">
+            <div class="d-flex">
+                <div class="toast-body" th:text="${error}"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <main class="container py-4">
+        <h2 th:text="${course.id != null} ? 'Sửa học phần' : 'Thêm học phần mới'">Form</h2>
+
+        <form th:action="${course.id != null} ? @{/admin/courses/update/{id}(id=${course.id})} : @{/admin/courses}"
+              th:object="${course}" method="post" enctype="multipart/form-data" class="col-md-6">
+            <input type="hidden" th:field="*{id}" th:if="${course.id != null}"/>
+            <div class="mb-3">
+                <label class="form-label">Tên học phần</label>
+                <input type="text" th:field="*{name}" class="form-control" required>
+                <div th:if="${#fields.hasErrors('name')}" class="text-danger small" th:errors="*{name}"></div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Hình ảnh</label>
+                <div id="imagePreview" class="mb-2">
+                    <img id="previewImg" th:if="${course.id != null and course.image != null and !course.image.isEmpty()}" th:src="${course.image}" alt="Ảnh mẫu" style="max-height:120px;border-radius:8px;display:block" onerror="this.style.display='none'">
+                    <img id="previewImgNew" src="" alt="Ảnh mẫu" style="max-height:120px;border-radius:8px;display:none">
+                    <p class="text-muted small mb-0 mt-1" id="previewHint" th:text="${course.id != null and course.image != null and !course.image.isEmpty()} ? 'Chọn file mới để thay ảnh (bỏ qua nếu giữ nguyên)' : 'Chọn file để xem ảnh mẫu'">Chọn file để xem ảnh mẫu</p>
+                </div>
+                <input type="file" name="imageFile" id="imageFile" accept="image/*" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Số tín chỉ</label>
+                <input type="number" th:field="*{credits}" class="form-control" min="1" required>
+                <div th:if="${#fields.hasErrors('credits')}" class="text-danger small" th:errors="*{credits}"></div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Giảng viên</label>
+                <input type="text" th:field="*{lecturer}" class="form-control" required>
+                <div th:if="${#fields.hasErrors('lecturer')}" class="text-danger small" th:errors="*{lecturer}"></div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Danh mục</label>
+                <select name="categoryId" class="form-select" required>
+                    <option th:each="cat, stat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"
+                            th:selected="${(course.category != null && course.category.id == cat.id) || (course.category == null && stat.first)}"></option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Lưu</button>
+            <a th:href="@{/admin/courses}" class="btn btn-secondary">Hủy</a>
+        </form>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            const toastErr = document.getElementById('toastErr');
+            if (toastErr) new bootstrap.Toast(toastErr, { autohide: true, delay: 5000 }).show();
+        })();
+        document.getElementById('imageFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const previewImg = document.getElementById('previewImg');
+            const previewImgNew = document.getElementById('previewImgNew');
+            const hint = document.getElementById('previewHint');
+            if (file && file.type.startsWith('image/')) {
+                if (previewImgNew.src && previewImgNew.src.startsWith('blob:')) URL.revokeObjectURL(previewImgNew.src);
+                previewImgNew.src = URL.createObjectURL(file);
+                previewImgNew.style.display = 'block';
+                if (previewImg) previewImg.style.display = 'none';
+                hint.textContent = 'Ảnh mẫu đã chọn:';
+            } else {
+                previewImgNew.style.display = 'none';
+                previewImgNew.src = '';
+                if (previewImg) previewImg.style.display = 'block';
+                hint.textContent = previewImg ? 'Chọn file mới để thay ảnh (bỏ qua nếu giữ nguyên)' : 'Chọn file để xem ảnh mẫu';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+/* Custom styles - Course Registration */
+:root {
+    --primary: #0d6efd;
+    --card-shadow: 0 4px 6px rgba(0,0,0,.08);
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+}
+
+.card {
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform .2s, box-shadow .2s;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0,0,0,.12);
+}
+
+.navbar {
+    box-shadow: 0 2px 8px rgba(0,0,0,.1);
+}
